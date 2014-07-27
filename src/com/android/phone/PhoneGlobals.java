@@ -73,6 +73,7 @@ import com.android.phone.OtaUtils.CdmaOtaScreenState;
 import com.android.phone.WiredHeadsetManager.WiredHeadsetListener;
 import com.android.server.sip.SipService;
 import com.android.services.telephony.common.AudioMode;
+import com.android.internal.util.slim.QuietHoursHelper;
 
 /**
  * Global state for the telephony subsystem when running in the primary
@@ -454,7 +455,7 @@ public class PhoneGlobals extends ContextWrapper implements WiredHeadsetListener
 
             CallLogger callLogger = new CallLogger(this, new CallLogAsync());
 
-            callGatewayManager = new CallGatewayManager();
+            callGatewayManager = CallGatewayManager.getInstance();
 
             // Create the CallController singleton, which is the interface
             // to the telephony layer for user-initiated telephony functionality
@@ -499,7 +500,8 @@ public class PhoneGlobals extends ContextWrapper implements WiredHeadsetListener
             callHandlerServiceProxy = new CallHandlerServiceProxy(this, callModeler,
                     callCommandService, audioRouter);
 
-            phoneMgr = PhoneInterfaceManager.init(this, phone, callHandlerServiceProxy);
+            phoneMgr = PhoneInterfaceManager.init(this, phone, callHandlerServiceProxy, callModeler,
+                    dtmfTonePlayer);
 
             // Create the CallNotifer singleton, which handles
             // asynchronous events from the telephony layer (like
@@ -538,6 +540,8 @@ public class PhoneGlobals extends ContextWrapper implements WiredHeadsetListener
             }
             intentFilter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
             intentFilter.addAction(REMOVE_BLACKLIST);
+            intentFilter.addAction(QuietHoursHelper.QUIET_HOURS_START);
+            intentFilter.addAction(QuietHoursHelper.QUIET_HOURS_STOP);
             registerReceiver(mReceiver, intentFilter);
 
             // Use a separate receiver for ACTION_MEDIA_BUTTON broadcasts,
@@ -1106,6 +1110,10 @@ public class PhoneGlobals extends ContextWrapper implements WiredHeadsetListener
                     BlacklistUtils.addOrUpdate(context, intent.getStringExtra(EXTRA_NUMBER),
                             0, blacklistType);
                 }
+            } else if (action.equals(QuietHoursHelper.QUIET_HOURS_START)){
+                QuietHoursHandler.getInstance(context).startQuietHours();
+            } else if (action.equals(QuietHoursHelper.QUIET_HOURS_STOP)){
+                QuietHoursHandler.getInstance(context).stopQuietHours();
             }
         }
     }

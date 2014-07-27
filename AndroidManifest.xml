@@ -569,7 +569,7 @@
         </receiver>
 
         <!-- BroadcastReceiver for receiving Intents from Notification mechanism. -->
-        <receiver android:name="PhoneGlobals$NotificationBroadcastReceiver" exported="false">
+        <receiver android:name="PhoneGlobals$NotificationBroadcastReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="com.android.phone.ACTION_HANG_UP_ONGOING_CALL" />
                 <action android:name="com.android.phone.ACTION_CALL_BACK_FROM_NOTIFICATION" />
@@ -579,6 +579,18 @@
 
         <!-- service to dump telephony information -->
         <service android:name="HfaService" android:exported="false"/>
+
+        <!-- QuietHours -->
+        <service android:name="QuietHoursAlarmService"/>
+
+        <activity
+            android:name="QuietHoursBypassAlarm"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait"
+            android:taskAffinity="com.android.phone.QuietHoursBypassAlarm"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
 
     </application>
 </manifest>
